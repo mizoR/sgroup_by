@@ -2,7 +2,18 @@
 
 require_relative "sgroup_by/version"
 
-# SgroupBy.new(enum).call do ||
+#
+# When grouping keys are forward matchable, partial loading allows grouping
+# while avoiding loading all data at once.
+#
+# ```rb
+# # Example
+#
+# grouping = SgroupBy.new(Prime.each(99999)) {|value| value.to_s.length }
+#
+# grouping.call {|key, values| p [key, values.count] }
+# ```
+#
 module SgroupBy
   class Error < StandardError; end
 
