@@ -1,8 +1,6 @@
 # SgroupBy
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sgroup_by`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Enumerator for streaming grouping.
 
 ## Installation
 
@@ -22,7 +20,15 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```rb
+# Assumption that the data is grouped by the value of the first row of the CSV and that there is no bias in the data.
+
+rows = CSV.foreach('./file-too-large-to-load-at-once.csv').extend(SgroupBy)
+
+grouping = rows.sgroup_by {|row| row[0] }
+
+grouping.each {|key, rows| p [key, rows.size] }
+```
 
 ## Development
 

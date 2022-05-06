@@ -9,49 +9,48 @@ require_relative "sgroup_by/version"
 # ```rb
 # # Example
 #
-# grouping = SgroupBy.new(Prime.each(99999)) {|value| value.to_s.length }
+# primes = Prime.each(99999).extend(SgroupBy)
 #
-# grouping.call {|key, values| p [key, values.count] }
+# grouping = primes.sgroup_by {|value| value.to_s.length }
+#
+# grouping.each {|key, values| p [key, values.count] }
 # ```
 #
 module SgroupBy
-  class Error < StandardError; end
-
-  def self.new(enum, &block)
-    Agent.new(enum, &block)
+  def sgroup_by(&block)
+    SgroupBy.new(self, &block)
   end
 
-  class Agent
-    def initialize(enum, &block)
-      @enum = enum
-      @block = block
-    end
+  def self.extended(object)
+    raise ArgumentError unless object.is_a?(Enumerable)
+  end
 
-    def call(&block)
+  def self.new(enum, &block)
+    raise ArgumentError unless enum.is_a?(Enumerable)
+
+    Enumerator.new do |y|
       key = nil
+      values = []
 
-      rows = []
-
-      @enum.each_with_index do |row, i|
+      enum.each_with_index do |row, i|
         if i == 0
-          key = @block.call(row)
-          rows << row
+          key = block.call(row)
+          values << row
         else
-          key1 = @block.call(row)
+          key1 = block.call(row)
 
           if key == key1
-            rows << row
+            values << row
           else
-            block.call(key, rows)
+            y << [key, values]
+
             key = key1
-            rows = [row]
+            values = [row]
           end
         end
       end
 
-      block.call(key, rows) unless rows.empty?
-
-      @enum
+      y << [key, values] unless values.empty?
     end
   end
 end

@@ -104,8 +104,8 @@ RSpec.describe SgroupBy do
 
     grouped = releases.group_by {|row| Date.parse(row[:date]).year }
 
-    grouping = described_class.new(releases) {|row| Date.parse(row[:date]).year }
+    grouping = releases.extend(SgroupBy).sgroup_by {|row| Date.parse(row[:date]).year }
 
-    grouping.call {|year, rows| expect(rows).to eq(grouped[year]) }
+    grouping.each {|year, rows| expect(rows).to eq(grouped[year]) }
   end
 end
